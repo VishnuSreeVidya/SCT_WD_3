@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .board-container {
+            position: relative;
+            width: fit-content;
+            margin: 0 auto;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+        }
+        .square {
+            width: 100px;
+            height: 100px;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid black;
+            cursor: pointer;
+            background-color: white;
+        }
+        .square:hover {
+            background-color: lightgray;
+        }
+        .strike {
+            position: absolute;
+            background-color: red;
+            height: 4px;
+            width: 310px;
+            top: 0;
+            left: 0;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Strike line orientations */
+        .strike.horizontal-0 { top: 50px; transform: scaleX(1); }
+        .strike.horizontal-1 { top: 155px; transform: scaleX(1); }
+        .strike.horizontal-2 { top: 260px; transform: scaleX(1); }
+
+        .strike.vertical-0 { top: 0; left: 50px; width: 4px; height: 310px; transform: scaleY(1); }
+        .strike.vertical-1 { top: 0; left: 155px; width: 4px; height: 310px; transform: scaleY(1); }
+        .strike.vertical-2 { top: 0; left: 260px; width: 4px; height: 310px; transform: scaleY(1); }
+
+        .strike.diagonal-0 {
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 440px;
+            transform: rotate(-45deg);
+            transform-origin: top left;
+        }
+
+        .strike.diagonal-1 {
+            top: 0;
+            right: 0;
+            left: auto;
+            width: 4px;
+            height: 440px;
+            transform: rotate(45deg);
+            transform-origin: top right;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tic-Tac-Toe</h1>
+    <div class="board-container">
+        <div class="board" id="board"></div>
+        <div id="strike" class="strike"></div>
+    </div>
+    <p id="status">Next player: X</p>
+    <button onclick="restartGame()">Restart Game</button>
+
+    <script>
+    let board = Array(9).fill(null);
+    let xIsNext = true;
+    let gameOver = false;
+
+    const WINNING_COMBOS = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical
+        [0, 4, 8], [2, 4, 6]             // Diagonal
+    ];
+
+    const STRIKE_CLASSES = [
+        'horizontal-0', 'horizontal-1', 'horizontal-2',
+        'vertical-0', 'vertical-1', 'vertical-2',
+        'diagonal-0', 'diagonal-1'
+    ];
+
+    function checkWinner() {
+        for (let i = 0; i < WINNING_COMBOS.length; i++) {
+            const [a, b, c] = WINNING_COMBOS[i];
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                document.getElementById("status").textContent = `Winner: ${board[a]}`;
+                document.getElementById("strike").className = `strike ${STRIKE_CLASSES[i]}`;
+                gameOver = true;
+                return true;
+            }
+        }
+        if (!board.includes(null)) {
+            document.getElementById("status").textContent = "Draw!";
+            gameOver = true;
+            return true;
+        }
+        return false;
+    }
+
+    function handleClick(index) {
+        if (board[index] || gameOver) return;
+
+        board[index] = xIsNext ? "X" : "O";
+        document.getElementById(`square-${index}`).textContent = board[index];
+
+        if (!checkWinner()) {
+            xIsNext = !xIsNext;
+            document.getElementById("status").textContent = `Next player: ${xIsNext ? "X" : "O"}`;
+        }
+    }
+
+    function restartGame() {
+        board.fill(null);
+        xIsNext = true;
+        gameOver = false;
+        document.getElementById("status").textContent = "Next player: X";
+        document.getElementById("board").innerHTML = "";
+        document.getElementById("strike").className = "strike"; // reset strike
+        createBoard();
+    }
+
+    function createBoard() {
+        const boardElement = document.getElementById("board");
+        for (let i = 0; i < 9; i++) {
+            const square = document.createElement("div");
+            square.classList.add("square");
+            square.id = `square-${i}`;
+            square.onclick = () => handleClick(i);
+            boardElement.appendChild(square);
+        }
+    }
+
+    createBoard();
+</script>
+
+</body>
+</html>
